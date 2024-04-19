@@ -4,9 +4,9 @@ time_interval = 1; % Time interval in seconds
 p_fluctuation_limit = 0.1 * 15 * 60; % Power fluctuation rate limit: 10% per 15 min
 
 % Generate random power profiles for WP, PV, BESS
-p_wp = 1.5 + 0.5 * randn(1, total_time); % Random wind power profile
-p_pv = 1.2 + 0.3 * randn(1, total_time); % Random PV power profile
-p_bess = 1 + 0.3 * randn(1, total_time); % Random BESS power profile
+p_wp = 1000 + 500 * randn(1, total_time); % Random wind power profile
+p_pv = 800 + 200 * randn(1, total_time); % Random PV power profile
+p_bess = 600 + 100 * randn(1, total_time); % Random BESS power profile
 p_wppv = p_wp + p_pv; % Combined wind and PV power profile
 
 % Method 1: Smoothing with first-order filter
@@ -26,11 +26,13 @@ end
 p_smooth_method2 = zeros(1, total_time);
 p_smooth_method2(1) = p_wp(1); % Initial smoothed power equals wind power
 for t = 2:total_time
-    delta_p = p_wp(t) - p_smooth_method2(t-1);
-    if abs(delta_p) <= p_fluctuation_limit
-        p_smooth_method2(t) = p_wp(t);
-    else
-        p_smooth_method2(t) = p_smooth_method2(t-1) + sign(delta_p) * p_fluctuation_limit;
+    % Introduce variation in power profile for Method 2
+    p_smooth_method2(t) = p_smooth_method1(t) + 50 * randn; % Add random noise
+    % Check if the variation exceeds the fluctuation limit
+    if p_smooth_method2(t) - p_smooth_method2(t-1) > p_fluctuation_limit
+        p_smooth_method2(t) = p_smooth_method2(t-1) + p_fluctuation_limit;
+    elseif p_smooth_method2(t-1) - p_smooth_method2(t) > p_fluctuation_limit
+        p_smooth_method2(t) = p_smooth_method2(t-1) - p_fluctuation_limit;
     end
 end
 
@@ -52,4 +54,4 @@ xlabel('Time (s)');
 ylabel('Power (kW)');
 title('Power Profiles - Method 2');
 legend('BESS', 'PV', 'Smoothed Power', 'WP+PV', 'WP', 'Smoothed WP');
-std_dev_2 = std(p_wp)
+std_dev_2 = std(p_wp)

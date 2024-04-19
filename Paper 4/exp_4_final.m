@@ -10,35 +10,30 @@ noise_level = 15; % Noise level to add randomness (kW)
 time = 0:1:50; % Time vector
 
 % Generate random fluctuations
-fluctuations = fluctuation_amplitude * sin(2*pi*0.01*time); % Fluctuations with frequency 0.01 Hz
+fluctuations = fluctuation_amplitude * sin(2*pi*0.01*time); 
 
 % Add noise to the fluctuations
-noise = noise_level * randn(size(time)); % Random noise
+noise = noise_level * randn(size(time));
 fluctuations = fluctuations + noise;
-
 % Generate load power profile
 load_power_profile = mean_load_power + fluctuations;
 
-
 % Define fuzzy logic controller parameters
-threshold = 3; % Adjust the threshold to reduce sensitivity
-
+threshold = 3; 
 % Apply fuzzy logic controller to smooth the load power profile
 for i = 2:length(load_power_profile)
     if abs(load_power_profile(i) - load_power_profile(i-1)) > threshold
         % If the difference between consecutive samples exceeds the threshold, smooth the value
         smoothed_load_power_profile(i) = (load_power_profile(i) + load_power_profile(i-1)) / 2;
     else
-        % Otherwise, keep the value unchanged
         smoothed_load_power_profile(i) = load_power_profile(i);
     end
 end
 
-
 % Define linguistic variables for rate of change
-change_low = [0 0 5]; % Low rate of change
-change_medium = [3 5 7]; % Medium rate of change
-change_high = [5 10 10]; % High rate of change
+change_low = [0 0 5]; 
+change_medium = [3 5 7]; 
+change_high = [5 10 10]; 
 
 % Define membership functions for rate of change
 change_low_mf = trimf(time(2:end), change_low);
@@ -76,7 +71,7 @@ plot(time, load_power_profile, 'b', 'LineWidth', 1.5);
 plot(time, smoothed_load_power_profile, 'r', 'LineWidth', 1.5);
 title('Original Load Power Profile');
 legend('Without Smoothing','With Smoothing')
-xlabel('Time (s)');
+xlabel('Time ');
 ylabel('Load Power (kW)');
 grid on;
 hold off;
